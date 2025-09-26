@@ -8,11 +8,16 @@
     <title>Document</title>
 </head>
 <body>
-<form method="POST">
-    {% csrf_token %}
-    <table><h1>{{form}}</h1></table>
-    <input type="submit" value="send">
-</form>
+<h1>Все пользователи</h1>
+    <ul>
+    {% for user in users %}
+        <li>{{ user.username }} (ID: {{ user.id }})</li>
+    {% empty %}
+        <li>Пользователей пока нет</li>
+    {% endfor %}
+    </ul>
 
+    <a href="/">На главную</a>
+    <a href="/reg">Регистрация</a>
 </body>
 </html>

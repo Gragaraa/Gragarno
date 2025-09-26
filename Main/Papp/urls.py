@@ -21,5 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("", views.page, name="index"),
     path("reg",views.pagereg),
-
+    path("users/", views.show_users, name="users"),
 ]
