@@ -6,13 +6,41 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <style>
+        .form_group{
+        position:relative;
+        top:400px;
+        left:800px;
+        background-color:red;
+
+        }
+    </style>
 </head>
 <body>
+<!--<form method="POST">-->
+<!--    -->
+<!--    {% csrf_token %}-->
+<!--    -->
+<!--    <table><h1>{{form}}</h1></table>-->
+<!--    <input type="submit" value="send">-->
+<!--</form>-->
 <form method="POST">
     {% csrf_token %}
-    <table><h1>{{form}}</h1></table>
-    <input type="submit" value="send">
-</form>
+<table>
 
+        {% for i in form %}
+    <div class="form_group">
+        {{ i.label_tag }}
+        {{ i }}
+        {% if i.errors %}
+            {% for error in i.errors %}
+                <div class="error_field error_d">{{ error }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endfor %}
+</table>
+    <input class="form_group" type="submit" value="send">
+</form>
 </body>
 </html>

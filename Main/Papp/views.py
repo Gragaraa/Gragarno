@@ -14,19 +14,16 @@ def page(request):
 def pagereg(request):
 
 
-    form=forms.MainInfoForm()
-    if request.method == "POST":
-        form= forms.MainInfoForm(request.POST)
-        if form.is_valid():
-            user=form.save()
-            print("✅ Пользователь сохранён:", user)
-            login(request,user)
-            return redirect("index")
-        else:
-            print("111")
-    else:
-        print("123")
+    # form=forms.MainInfoForm()
+    # if request.method == "POST":
+    #     form= forms.MainInfoForm(request.POST)
+    #     if form.is_valid():
+    #         user=form.save()
+    #         print("✅ Пользователь сохранён:", user)
+    #         login(request,user)
+    #         return redirect("index")
 
+    form=forms.EventForm()
     data={
         "form":form
     }
