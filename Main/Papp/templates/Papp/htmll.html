@@ -7,15 +7,26 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="{% static 'Papp/css/stylee.css'%}"/>
-    <title>Page</title>
+    <title>{%block title%}base{%endblock%}</title>
+    {%block css%}
+    {%endblock%}
 </head>
 <body>
 
-<div class="hat"><div class="navigator"><ul>
+<div class="hat"><div class="navigator">
+    <ul>
     Перейти
-    <li class="first">Главная</li>
-    <li class="second"><a href="http://127.0.0.1:8000/users">База данных</a></li>
-    <li class="third"><a href="http://127.0.0.1:8000/reg">Регистрация</a></li>
-</ul></div></div>
+    <li class="first"><a href="{% url 'index' %}">Главная</a></li>
+    <li class="second"><a href="{% url 'users' %}">База данных</a></li>
+    {% if user.is_authenticated %}
+        <li><a href="{% url 'logout' %}">Выйти ({{ user.username }})</a></li>
+    {% else %}
+        <li><a href="{% url 'login' %}">Вход</a></li>
+        <li><a href="{% url 'register' %}">Регистрация</a></li>
+    {% endif %}
+    </ul>
+</div></div>
+{% block content%}
+{% endblock %}
 </body>
 </html>

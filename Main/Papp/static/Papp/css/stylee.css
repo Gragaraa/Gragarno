@@ -59,6 +59,7 @@ P {
 }
 
 
-.navigator li:nth-child(1) { transition-delay: 0.0s; }
-.navigator li:nth-child(2) { transition-delay: 0.1s; }
-.navigator li:nth-child(3) { transition-delay: 0.2s; }
+.navigator li:nth-of-type(1) { transition-delay: 0.0s; }
+.navigator li:nth-of-type(2) { transition-delay: 0.1s; }
+.navigator li:nth-of-type(3) { transition-delay: 0.2s; }
+.navigator li:nth-of-type(4) { transition-delay: 0.3s; }

@@ -1,32 +1,21 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+{% extends 'Papp/htmll.html' %}
+{% block title %}Регистрация{% endblock %}
+{% block content %}
     <style>
         .form_group{
         position:relative;
-        top:400px;
-        left:800px;
+        top:40vh;
+        left:40vw;
         background-color:red;
 
         }
     </style>
 </head>
 <body>
-<!--<form method="POST">-->
-<!--    -->
-<!--    {% csrf_token %}-->
-<!--    -->
-<!--    <table><h1>{{form}}</h1></table>-->
-<!--    <input type="submit" value="send">-->
-<!--</form>-->
+
 <form method="POST">
     {% csrf_token %}
-<table>
+
 
         {% for i in form %}
     <div class="form_group">
@@ -39,8 +28,7 @@
         {% endif %}
     </div>
 {% endfor %}
-</table>
+
     <input class="form_group" type="submit" value="send">
 </form>
-</body>
-</html>
+{% endblock %}

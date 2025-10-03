@@ -1,0 +1,39 @@
+{% extends 'Papp/htmll.html' %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<style>
+    .login-form {
+        position: relative;
+        top: 30vh;
+        left: 40vw;
+        background-color: #f0f0f0;
+        padding: 20px;
+        border-radius: 8px;
+        width: 250px;
+    }
+    .login-form input {
+        display: block;
+        margin: 10px 0;
+        padding: 5px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+</style>
+
+<h2>Войти в аккаунт</h2>
+<form method="post" class="login-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Войти">
+</form>
+
+{% if next %}
+    <input type="hidden" name="next" value="{{ next }}">
+{% endif %}
+
+{% if form.errors %}
+    <p style="color: red;">Неверное имя пользователя или пароль.</p>
+{% endif %}
+{% endblock %}

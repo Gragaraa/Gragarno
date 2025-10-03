@@ -1,23 +1,25 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-</head>
-<body>
-<h1>Все пользователи</h1>
-    <ul>
-    {% for user in users %}
-        <li>{{ user.username }} (ID: {{ user.id }})</li>
-    {% empty %}
-        <li>Пользователей пока нет</li>
-    {% endfor %}
-    </ul>
+    {% extends 'Papp/htmll.html' %}
+    {%block title%}Данные{%endblock%}
+    {%block css%}
+    <style>
+        .userss{
+            font-size:20px;
+            background-color:grey;
+            margin:5px;
 
-    <a href="/">На главную</a>
-    <a href="/reg">Регистрация</a>
-</body>
-</html>
+
+        }
+    </style>
+    {%endblock%}
+    {%block content%}
+    <h1>Все пользователи</h1>
+
+        <ul>
+        {% for user in users %}
+            <li class="userss">{{ user.username }} (ID: {{ user.id }})</li>
+        {% empty %}
+            <li>Пользователей пока нет</li>
+        {% endfor %}
+        </ul>
+
+    {%endblock%}
