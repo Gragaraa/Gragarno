@@ -4,6 +4,8 @@ from . import models
 from django.contrib.auth import login, authenticate, logout
 from .models import User
 from django.contrib.auth.forms import AuthenticationForm
+from django.views.decorators.cache import never_cache
+@never_cache
 def page(request):
     list_event = models.Event.objects.all()
     data={
@@ -12,6 +14,7 @@ def page(request):
         data[i.data]: i.description
 
     return render(request, 'Papp/htmll.html', data)
+
 def pagereg(request):
 
 

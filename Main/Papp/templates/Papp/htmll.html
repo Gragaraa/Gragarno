@@ -9,6 +9,24 @@
     <link rel="stylesheet" href="{% static 'Papp/css/stylee.css'%}"/>
     <title>{%block title%}base{%endblock%}</title>
     {%block css%}
+    <style>
+        .mainblock{
+        display:flex;
+        }
+        .block1{
+        height:900px;
+        width:550px;
+        background-color:grey;
+        margin:20px;
+        display:inline-block;
+        font-size:40px;
+        padding:5px;
+        }
+        .size{
+        width=300px;
+        height:300px;
+        }
+    </style>
     {%endblock%}
 </head>
 <body>
@@ -27,6 +45,18 @@
     </ul>
 </div></div>
 {% block content%}
+{% if user.is_authenticated %}
+<div class="mainblock">
+<div class="block1"><img class="size" src="{% static 'Papp/images/download.jpg'%}">
+    Добро пожаловать в нашу школьную семью! Здесь каждый день — это новая возможность учиться, расти и открывать мир. Наша школа — не просто здание с классами, а пространство, где рождаются идеи, дружба и будущие мечты.</div>
+<div class="block1"><img class="size" src="{% static 'Papp/images/download.png'%}">
+    Учимся с увлечением От уроков математики до школьных спектаклей — у нас каждый найдёт занятие по душе. Современные технологии, творческие проекты и поддержка педагогов помогают раскрыть таланты каждого ученика.</div>
+<div class="block1"><img class="size" src="{% static 'Papp/images/download (1).jpg'%}">
+    Вместе к успеху Родители, учителя и ученики — мы единая команда. На этом сайте вы всегда найдёте актуальную информацию: расписание, новости, достижения и полезные советы для учёбы и отдыха.</div>
+</div>
+{% else %}
+<h1>Please, registrate first</h1>
+{% endif %}
 {% endblock %}
 </body>
 </html>
