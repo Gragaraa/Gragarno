@@ -9,6 +9,7 @@ P {
 }
 
 .hat {
+  display:flex;
   width: 100%;
   background-color: brown;
   height: 50px;
@@ -17,7 +18,12 @@ P {
   border-radius: 2%;
   position: relative;
 }
-
+.moveright{
+    position:relative;
+    left:1130px;
+    width:200px;
+    height:200px;
+    }
 .navigator {
   position: relative;
   background-color: green;
@@ -28,7 +34,17 @@ P {
   color: white;
   cursor: pointer;
 }
-
+.nice{
+  position: relative;
+  background-color: green;
+  height: 50px;
+  width: 300px;
+  margin: 0;
+  border: 4px solid black;
+  color: white;
+  cursor: pointer;
+  font-size:25px;
+}
 .navigator ul {
   list-style: none;
   padding: 0;

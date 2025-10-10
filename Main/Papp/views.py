@@ -51,8 +51,7 @@ def user_login(request):
             if user is not None:
                 login(request, user)
 
-                next_url = request.GET.get('next', 'index')
-                return redirect(next_url)
+                return redirect('index')
     else:
         form = AuthenticationForm()
 

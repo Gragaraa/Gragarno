@@ -1,0 +1,55 @@
+
+{% extends 'Papp/htmll.html' %}
+{%block css%}
+<style>
+  body{
+  background-color:grey;
+}
+  .page{
+  background-color:white;
+  position:relative;
+  left:250px;
+  top:100px;
+  width:1300px;
+  overflow-wrap: break-word;
+  border: 4px solid black;
+  padding:5px;
+  border-radius:10%
+
+  }
+  .empt{
+  width:1200px;
+  height:200px;
+  text-align:center;
+  font-size:40px;
+  }
+  .butt{
+  background-color:green;
+  color:white;
+  height:100px;
+  text-align:center;
+  font-size:25px;
+  border-radius:30%;
+  width:130vh;
+  }
+</style>
+
+{%endblock%}
+{% block title %}Регистрация{% endblock %}
+{% block content %}
+<div class="page"><div class="empt"><h1>ВСЕ ПОСТЫ ФОРУМА</h1></div>
+<div class="posts">
+<ul>
+{% for post in posts %}
+    <li>
+        <h3>{{ post.name }}</h3>
+        <p>{{ post.description }}</p>
+    </li>
+{% empty %}
+    <li>Постов пока нет.</li>
+{% endfor %}
+</ul></div>
+<div class="butt"><a href="{% url 'create'%}"><h1>Добавить свой пост</h1></a></div>
+</div>
+
+{% endblock %}

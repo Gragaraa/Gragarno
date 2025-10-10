@@ -1,0 +1,21 @@
+{% extends 'Papp/htmll.html' %}
+{%block css%}
+<style>
+    .reg{
+    position:relative;
+    left:700px;
+    top:200px;
+    }
+</style>
+{%endblock%}
+{%block content%}
+{% if user.is_authenticated %}
+<form class="reg" method="post">
+    {% csrf_token %}
+    <div >{{ form }}</div>
+    <button type="submit">Опубликовать</button>
+</form>
+{%else%}
+<h1>Please, registrate first</h1>
+{%endif%}
+{%endblock%}

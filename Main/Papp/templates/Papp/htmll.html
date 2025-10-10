@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'Papp/css/stylee.css'%}"/>
     <title>{%block title%}base{%endblock%}</title>
     {%block css%}
+    {%endblock%}
     <style>
         .mainblock{
         display:flex;
@@ -26,8 +27,9 @@
         width=300px;
         height:300px;
         }
+
     </style>
-    {%endblock%}
+
 </head>
 <body>
 
@@ -43,7 +45,10 @@
         <li><a href="{% url 'register' %}">Регистрация</a></li>
     {% endif %}
     </ul>
-</div></div>
+</div>
+<div class="nice"><a href="{% url 'forum'%}">Форум</a></div>
+    <div><img class="moveright" src="{% static 'Papp/images/i.webp' %}"></div>
+</div>
 {% block content%}
 {% if user.is_authenticated %}
 <div class="mainblock">
