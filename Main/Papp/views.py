@@ -22,7 +22,10 @@ def pagereg(request):
     if request.method == "POST":
         form= forms.MainInfoForm(request.POST)
         if form.is_valid():
-            user=form.save()
+
+            user=form.save(commit=False)
+            user.rating=0
+            user.save()
             print("✅ Пользователь сохранён:", user)
             login(request,user)
             return redirect("index")
@@ -59,3 +62,10 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('index')
+def leader(request):
+    users=User.objects.order_by('-rating')[:10]
+    data={
+        'users':users
+    }
+
+    return  render(request,'Papp/leaderboard.html',data)
