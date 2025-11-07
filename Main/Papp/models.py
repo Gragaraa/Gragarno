@@ -8,3 +8,6 @@ class Event(models.Model):
     description = models.TextField(max_length=500)
 class User(AbstractUser):
     rating=models.IntegerField()
+class Product(models.Model):
+    name = models.CharField(max_length=100)
+    price = models.IntegerField()

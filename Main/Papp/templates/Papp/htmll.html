@@ -58,6 +58,7 @@
 </div>
 {% block content%}
 {% if user.is_authenticated %}
+<a href="{% url 'shop'%}">МАГАЗИН</a>
 <div class="mainblock">
 <div class="block1"><img class="size" src="{% static 'Papp/images/download.jpg'%}">
     Добро пожаловать в нашу школьную семью! Здесь каждый день — это новая возможность учиться, расти и открывать мир. Наша школа — не просто здание с классами, а пространство, где рождаются идеи, дружба и будущие мечты.</div>

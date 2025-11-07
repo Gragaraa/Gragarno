@@ -1,8 +1,10 @@
+from itertools import product
+
 from django.shortcuts import render,redirect
 from . import forms
 from . import models
 from django.contrib.auth import login, authenticate, logout
-from .models import User
+from .models import User,Product
 from django.contrib.auth.forms import AuthenticationForm
 from django.views.decorators.cache import never_cache
 @never_cache
@@ -69,3 +71,11 @@ def leader(request):
     }
 
     return  render(request,'Papp/leaderboard.html',data)
+def shop(request):
+
+    products=models.Product.objects.all()
+
+    data={
+        'shop':products
+    }
+    return render(request,'Papp/shop.html',data)

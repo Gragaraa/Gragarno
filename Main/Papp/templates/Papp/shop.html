@@ -1,0 +1,28 @@
+{% extends 'Papp/htmll.html' %}
+{% block title %}Магазин{% endblock %}
+{%block css%}
+
+<style>.block{
+height:500px;
+width:500px;
+background-color:red;
+    .name{
+    background-color:green;
+    font-size:50px;
+    }
+    .price{
+    background-color:blue;
+    font-size:80px;}
+</style>
+
+{%endblock%}
+{% block content %}
+{%for i in shop%}
+<div class="block">
+<div class="name">{{i.name}}</div>
+<div class="price">{{i.price}}</div>
+</div>
+
+
+{%endfor%}
+{% endblock %}
