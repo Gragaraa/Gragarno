@@ -7,7 +7,7 @@ class Event(models.Model):
     data = models.CharField(max_length=120)
     description = models.TextField(max_length=500)
 class User(AbstractUser):
-    rating=models.IntegerField()
+    pass
 class Product(models.Model):
     name = models.CharField(max_length=100)
     price = models.IntegerField()

@@ -17,12 +17,12 @@ def CreateForum(request):
 
         if form.is_valid():
             user = User.objects.get(username=request.user)
-            user.rating+=1
+
             checkform = form.save(commit=False)
             checkform.usera=request.user
 
             checkform.save()
-            user.save(update_fields=['rating'])
+            user.save()
             return redirect("forum")
     data={"form":form}
     return render(request,'SchoolF/CreateForum.html',data)

@@ -64,13 +64,7 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('index')
-def leader(request):
-    users=User.objects.order_by('-rating')[:10]
-    data={
-        'users':users
-    }
 
-    return  render(request,'Papp/leaderboard.html',data)
 def shop(request):
 
     products=models.Product.objects.all()
