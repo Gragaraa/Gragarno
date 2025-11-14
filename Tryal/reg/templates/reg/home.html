@@ -1,0 +1,9 @@
+{%extends "Base/html.html"%}
+{% block title %}
+Home
+{%endblock%}
+{% block every %}
+<h1>Добро пожаловать, чтобы продолжить войдите или зарегистрируйтесь</h1>
+<h1><a href="{% url 'reg'%}">Войти</a></h1>
+<h1><a href="{% url 'reg'%}">Зарегистрироватться</a></h1>
+{% endblock %}
