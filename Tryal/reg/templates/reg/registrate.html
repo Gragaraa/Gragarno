@@ -3,4 +3,9 @@
 Registration
 {%endblock%}
 {% block every %}
+<form method="POST">
+    {% csrf_token %}
+    {{ form }}
+    <input class="form_group" type="submit" value="send">
+</form>
 {% endblock %}

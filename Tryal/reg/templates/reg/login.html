@@ -1,6 +1,20 @@
-{%extends "Base/html.html"%}
-{% block title %}
-Registration
-{%endblock%}
+{% extends "Base/html.html" %}
+
+{% block title %}Login{% endblock %}
+
 {% block every %}
+<h2>Войти</h2>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Войти</button>
+</form>
+
+{% if messages %}
+    {% for message in messages %}
+        <p style="color: red;">{{ message }}</p>
+    {% endfor %}
+{% endif %}
+
+<p><a href="{% url 'reg' %}">Зарегистрироваться</a></p>
 {% endblock %}
