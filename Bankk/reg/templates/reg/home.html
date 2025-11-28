@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{%block title%}home page{% endblock title%}</title>
+  <style>
+    {%block style%}{%endblock style%}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f5f7fa;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background-color: #2c3e50;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #ecf0f1;
+      text-decoration: none;
+    }
+
+    .auth-buttons, .user-controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .auth-buttons a,
+    .user-controls a,
+    .balance {
+      text-decoration: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+
+    .auth-buttons a:hover,
+    .user-controls a:hover {
+      background-color: #34495e;
+    }
+
+    .balance {
+      background-color: #3498db;
+      font-weight: bold;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+    }
+
+
+    main {
+      padding: 2rem;
+    }
+
+
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+      }
+
+      .auth-buttons, .user-controls {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="{% url 'home' %}" class="logo">Финансы</a>
+
+
+    <div class="auth-buttons">
+      <a href="{% url 'login' %}">Вход</a>
+      <a href="{% url 'reg' %}">Регистрация</a>
+    </div>
+
+{% if user.is_authenticated %}
+    <div class="user-controls">
+      <a href="/add-expense">Добавить расход</a>
+      <a href="/add-income">Добавить доход</a>
+      <span class="balance">Баланс: </span>
+      <a href="{% url 'logout' %}">Выход</a>
+    </div>
+{% endif %}
+
+  </header>
+
+  <main>
+{%block content %}
+<h1>Добро пожаловать!</h1>
+{% endblock content %}
+
+
+  </main>
+
+</body>
+</html>
