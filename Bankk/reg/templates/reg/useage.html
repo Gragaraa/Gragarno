@@ -1,0 +1,35 @@
+{% extends 'reg/home.html' %}
+{% block title %}useage{% endblock %}
+{% block style %}{% endblock %}
+{% block content %}
+<h2>Добавить расход</h2>
+<form method="POST">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Добавить</button>
+</form>
+
+<h3>История расходов:</h3>
+<ul>
+  {% for exp in expenses %}
+    <li>{{ exp.amount }} ₽ — {{ exp.category }} — {{ exp.description|default:"Без описания" }} ({{ exp.created_at|date:"d.m.Y H:i" }})</li>
+  {% empty %}
+    <li>Нет расходов</li>
+  {% endfor %}
+</ul>
+<h3>Расходы по категориям:</h3>
+{% if category_summary %}
+  <ul>
+    {% for item in category_summary %}
+      <li>
+        <strong>{{ item.category__name|default:"Без категории" }}</strong>:
+        {{ item.total }} ₽
+      </li>
+    {% endfor %}
+  </ul>
+  <p><strong>Всего потрачено:</strong> {{ total_spent }} ₽</p>
+{% else %}
+  <p>Нет данных по категориям</p>
+{% endif %}
+
+{% endblock %}

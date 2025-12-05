@@ -90,17 +90,19 @@
     <a href="{% url 'home' %}" class="logo">Финансы</a>
 
 
-    <div class="auth-buttons">
-      <a href="{% url 'login' %}">Вход</a>
-      <a href="{% url 'reg' %}">Регистрация</a>
-    </div>
+
 
 {% if user.is_authenticated %}
     <div class="user-controls">
-      <a href="/add-expense">Добавить расход</a>
-      <a href="/add-income">Добавить доход</a>
-      <span class="balance">Баланс: </span>
+      <a href="{% url 'useage' %}">Добавить расход</a>
+      <a href="{%url 'income'%}">Добавить доход</a>
+      <span class="balance">Баланс: {{ balance }} ₽</span>
       <a href="{% url 'logout' %}">Выход</a>
+    </div>
+{%else%}
+    <div class="auth-buttons">
+      <a href="{% url 'login' %}">Вход</a>
+      <a href="{% url 'reg' %}">Регистрация</a>
     </div>
 {% endif %}
 
