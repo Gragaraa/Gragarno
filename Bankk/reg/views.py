@@ -42,7 +42,6 @@ def flogout(request):
 
 
 @login_required
-@login_required
 def useage(request):
     if request.method == "POST":
         form = ExpenseForm(request.POST)
@@ -54,10 +53,10 @@ def useage(request):
     else:
         form = ExpenseForm()
 
-    # Все расходы
+
     expenses = Expense.objects.filter(user=request.user).order_by('-created_at')
 
-    # Сводка по категориям
+
     category_summary = (
         Expense.objects
         .filter(user=request.user)
@@ -66,7 +65,7 @@ def useage(request):
         .order_by('-total')
     )
 
-    # Общая сумма ВСЕХ расходов
+
     total_spent = Expense.objects.filter(user=request.user).aggregate(
         total=Sum('amount')
     )['total'] or 0
