@@ -1,0 +1,141 @@
+{% extends 'Core/base.html' %}
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .map-layout { display: flex; height: calc(100vh - 80px); gap: 10px; }
+    #map { flex: 3; border-radius: 10px; }
+    .sidebar { flex: 1; background: white; padding: 20px; overflow-y: auto; border-radius: 10px; box-shadow: -2px 0 5px rgba(0,0,0,0.1); }
+    .visit-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+    .btn-delete { color: red; cursor: pointer; font-size: 0.8rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="map-layout">
+    <div id="map"></div>
+    <div class="sidebar">
+        <h3>Мои места</h3>
+        <div id="visit-list">
+            {% for visit in user_visits %}
+            <div class="visit-item" id="visit-{{ visit.id }}">
+                <div>
+                    <strong>{{ visit.location.name }}</strong><br>
+                    <small>{{ visit.notes|truncatechars:30 }}</small>
+                </div>
+                <span class="btn-delete" onclick="deletePoint({{ visit.id }})">❌</span>
+            </div>
+            {% endfor %}
+        </div>
+        <hr>
+        <h4>Создать маршрут</h4>
+        <input type="text" id="route-name" placeholder="Название маршрута" style="width:100%; margin-bottom:10px;">
+        <textarea id="route-desc" placeholder="Описание" style="width:100%; height:60px;"></textarea>
+        <button onclick="saveRoute()" style="width:100%; background:#2ecc71; color:white; border:none; padding:10px; border-radius:5px; margin-top:10px; cursor:pointer;">
+            Соединить точки в маршрут
+        </button>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // 1. Инициализация карты
+    var map = L.map('map').setView([55.75, 37.61], 4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    let markers = {}; // Объект для хранения маркеров {id_визита: объект_маркера}
+    let polyline = L.polyline([], {color: 'blue', weight: 3}).addTo(map);
+
+    // Вспомогательная функция для CSRF (нужна для всех POST запросов)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // 2. Отрисовка существующих точек из базы (которые передал Django)
+    {% for visit in user_visits %}
+        addMarkerToMap({{ visit.location.lat }}, {{ visit.location.lon }}, "{{ visit.location.name }}", {{ visit.id }});
+    {% endfor %}
+    updatePolyline(); // Сразу соединяем старые точки линией
+
+    function addMarkerToMap(lat, lon, name, id) {
+        let m = L.marker([lat, lon]).addTo(map).bindPopup(`<b>${name}</b>`);
+        markers[id] = m;
+    }
+
+    function updatePolyline() {
+        // Берем все маркеры, вытаскиваем координаты и обновляем линию
+        let coords = Object.values(markers).map(m => m.getLatLng());
+        polyline.setLatLngs(coords);
+    }
+
+    // 3. ОБРАБОТКА КЛИКА (То, что у тебя отвалилось)
+    function onMapClick(e) {
+        const lat = e.latlng.lat;
+        const lon = e.latlng.lng;
+
+        const locationName = prompt("Как назовем это место?");
+        if (!locationName) return;
+
+        // Отправляем в Django, чтобы сохранить
+        fetch("{% url 'save_location' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie('csrftoken')
+            },
+            body: JSON.stringify({ lat: lat, lon: lon, name: locationName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Если в базе создалось, добавляем на карту и в список
+                location.reload(); // Самый простой способ обновить список и карту сразу
+            }
+        });
+    }
+
+    map.on('click', onMapClick);
+
+    // 4. Удаление точки
+    function deletePoint(id) {
+        if (!confirm("Удалить эту точку?")) return;
+
+        fetch(`/delete-visit/${id}/`, {
+            method: 'POST',
+            headers: { "X-CSRFToken": getCookie('csrftoken') }
+        }).then(res => {
+            if (res.ok) location.reload();
+        });
+    }
+
+    // 5. Сохранение маршрута
+    function saveRoute() {
+        const name = document.getElementById('route-name').value;
+        const desc = document.getElementById('route-desc').value;
+        const visitIds = Object.keys(markers);
+
+        if (visitIds.length < 2) {
+            alert("Нужно хотя бы 2 точки для маршрута!");
+            return;
+        }
+
+        fetch("{% url 'create_route' %}", {
+            method: 'POST',
+            headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie('csrftoken') },
+            body: JSON.stringify({ visit_ids: visitIds, name: name, description: desc })
+        }).then(res => res.json()).then(data => alert("Маршрут успешно создан!"));
+    }
+</script>
+
+
+{% endblock %}

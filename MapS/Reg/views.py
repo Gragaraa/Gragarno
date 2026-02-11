@@ -3,7 +3,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from .forms import UserRegisterForm
-
+from django.contrib.auth.decorators import login_required
 
 def register_view(request):
     if request.method == 'POST':
@@ -44,3 +44,7 @@ def logout_view(request):
     logout(request)
     messages.info(request, "Вы вышли из аккаунта.")
     return redirect('home')
+
+@login_required
+def profile_view(request):
+    return render(request, 'Reg/Profile.html', {'user': request.user})

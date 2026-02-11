@@ -20,6 +20,10 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index, name="home")
+    path('', views.index, name="home"),
+    path('map/', views.map_view,name='map_page'),
+    path('save_location/', views.save_location,name='save_location'),
+    path('create-route/', views.create_route, name='create_route'),
+    path('delete-visit/<int:visit_id>/', views.delete_visit, name='delete_visit'),
 
 ]

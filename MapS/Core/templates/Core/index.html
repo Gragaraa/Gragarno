@@ -51,8 +51,8 @@
         <div class="btn-group">
             {% if user.is_authenticated %}
                 <p>Добро пожаловать, {{ user.username }}!</p>
-                <a href="#" class="btn btn-login">Перейти к карте</a>
-                <a href="#" class="btn btn-login">Личный кабинет</a>
+                <a href="{% url 'map_page' %}" class="btn btn-login">Перейти к карте</a>
+                <a href="{% url 'profile' %}" class="btn btn-login">Личный кабинет</a>
                 <a href="{% url 'logout' %}" style="color: #ff4d4d; margin-left: 15px;">Выйти</a>
             {% else %}
                 <a href="{% url 'register' %}" class="btn btn-reg">Начать бесплатно</a>
@@ -62,6 +62,7 @@
     </div>
 </body>
 </html>
+
 
 
 

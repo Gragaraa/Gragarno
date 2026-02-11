@@ -6,8 +6,8 @@ from django.conf import settings
 class Location(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название")
     country = models.CharField(max_length=100, verbose_name="Страна")
-    coordX= models.FloatField(max_length=30, verbose_name="Долгота")
-    coordY=models.FloatField(max_length=30, verbose_name="Широта")
+    lon= models.FloatField(verbose_name="Долгота",default=0.0)
+    lat=models.FloatField(verbose_name="Широта", default=0.0)
 
 
     def __str__(self):
@@ -26,6 +26,7 @@ class Route(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название маршрута")
     description = models.TextField(blank=True)
     visits = models.ManyToManyField(Visit, related_name='routes', verbose_name="Точки маршрута")
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class Achievement(models.Model):
