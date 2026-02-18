@@ -25,5 +25,8 @@ urlpatterns = [
     path('save_location/', views.save_location,name='save_location'),
     path('create-route/', views.create_route, name='create_route'),
     path('delete-visit/<int:visit_id>/', views.delete_visit, name='delete_visit'),
+    path('my-routes/', views.routes_list, name='routes_list'),
+    path('route/<int:route_id>/', views.view_route, name='view_route'),
+    path('achievements/',views.achievements_view,name='achievements')
 
 ]

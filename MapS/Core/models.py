@@ -8,6 +8,7 @@ class Location(models.Model):
     country = models.CharField(max_length=100, verbose_name="Страна")
     lon= models.FloatField(verbose_name="Долгота",default=0.0)
     lat=models.FloatField(verbose_name="Широта", default=0.0)
+    city=models.CharField(max_length=100, blank=True, null=True)
 
 
     def __str__(self):
@@ -25,7 +26,7 @@ class Route(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, verbose_name="Название маршрута")
     description = models.TextField(blank=True)
-    visits = models.ManyToManyField(Visit, related_name='routes', verbose_name="Точки маршрута")
+    points_json = models.JSONField(default=list)
     created_at = models.DateTimeField(auto_now_add=True)
 
 

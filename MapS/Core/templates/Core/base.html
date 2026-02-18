@@ -40,8 +40,9 @@
     <div class="logo">🗺 TravelMap</div>
     <nav>
         <a href="{% url 'home' %}">Главная</a>
-        <a href="{% url 'map_page' %}">Карта</a> <a href="{% url 'profile' %}">Профиль</a>
-        <a href="#">Достижения</a>
+        <a href="{% url 'map_page' %}">Карта</a>
+        <a href=" {%url 'routes_list'%}">Мои маршруты</a><a href="{% url 'profile' %}">Профиль</a>
+        <a href="{% url 'achievements' %}">Достижения</a>
         <a href="{% url 'logout' %}" class="btn-logout">Выйти</a>
     </nav>
 </header>
