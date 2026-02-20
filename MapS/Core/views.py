@@ -24,7 +24,7 @@ def save_location(request):
             lat, lon = data.get('lat'), data.get('lon')
             name = data.get('name', 'Новое место')
 
-            # Геокодинг
+
             country, city = "Неизвестно", "Неизвестно"
             try:
                 url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json"
@@ -39,22 +39,30 @@ def save_location(request):
             loc = Location.objects.create(name=name, lat=lat, lon=lon, country=country, city=city)
             Visit.objects.create(user=request.user, location=loc)
 
-            # Геймификация (НЕ ЗАВИСИТ ОТ УДАЛЕНИЯ ТОЧЕК)
+
             user = request.user
             user.total_points_ever += 1
-            user.experience += 50
+            xp = 100
+            if not user.ach_1_point:
+                user.ach_1_point = True
+                xp += 100
 
-            if not user.ach_first_point:
-                user.ach_first_point = True
+            if user.total_points_ever >= 10 and not user.ach_10_points:
+                user.ach_10_points = True
+                xp += 500
 
-            if user.total_points_ever >= 10 and not user.ach_country_explorer:
-                user.ach_country_explorer = True
-                user.title = "Опытный бродяга"
+            if user.total_points_ever >= 50 and not user.ach_50_points:
+                user.ach_50_points = True
+                xp += 2000
+            if user.total_points_ever >= 500:
+                xp += 400
 
-            if user.experience >= 500:
-                user.level += 1
-                user.experience = 0
-
+            unique_countries = Visit.objects.filter(user=user).values('location__country').distinct().count()
+            if unique_countries >= 3 and not user.ach_3_countries:
+                user.ach_3_countries = True
+                xp += 1500
+            user.total_experience += xp
+            user.add_xp(xp)
             user.save()
             return JsonResponse({'status': 'success'})
         except Exception as e:
@@ -72,7 +80,25 @@ def create_route(request):
                 description=data.get('description', ''),
                 points_json=data.get('points')
             )
-            return JsonResponse({'status': 'success'})  # ОБЯЗАТЕЛЬНО ДОЛЖНО БЫТЬ ТУТ
+
+            user = request.user
+            user.total_routes_ever += 1
+
+            xp = 100
+
+            routes_count = user.total_routes_ever
+            if routes_count == 1 and not user.ach_1_route:
+                user.ach_1_route = True
+                xp += 300
+
+            if routes_count >= 5 and not user.ach_5_routes:
+                user.ach_5_routes = True
+                xp += 1000
+            if routes_count>=30:
+                xp+=400
+            user.total_experience+=xp
+            user.add_xp(xp)
+            return JsonResponse({'status': 'success'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
@@ -100,5 +126,21 @@ def view_route(request, route_id):
 
 @login_required
 def achievements_view(request):
-    # Теперь просто отдаем юзера, а в шаблоне смотрим его Boolean поля
+
     return render(request, 'Core/achievements.html')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
