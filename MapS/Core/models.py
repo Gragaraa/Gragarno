@@ -9,6 +9,10 @@ class Location(models.Model):
     lon= models.FloatField(verbose_name="Долгота",default=0.0)
     lat=models.FloatField(verbose_name="Широта", default=0.0)
     city=models.CharField(max_length=100, blank=True, null=True)
+    is_game_task = models.BooleanField(default=False, verbose_name="Это точка-задание для игры")
+    panorama_url = models.URLField(blank=True, null=True, verbose_name="Ссылка на панораму 360")
+    panorama_file= models.ImageField(upload_to='panoramas/',blank=True,null=True)
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,null=True,blank=True)
 
 
     def __str__(self):

@@ -7,7 +7,7 @@
     <style>
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f0f2f5; }
 
-        /* Стили Хедера */
+
         header {
             background: #2c3e50;
             color: white;
@@ -41,7 +41,9 @@
     <nav>
         <a href="{% url 'home' %}">Главная</a>
         <a href="{% url 'map_page' %}">Карта</a>
-        <a href=" {%url 'routes_list'%}">Мои маршруты</a><a href="{% url 'profile' %}">Профиль</a>
+        <a href=" {%url 'routes_list'%}">Мои маршруты</a>
+        <a href="{% url 'geoguessr' %}" style="color: #f1c40f; font-weight: bold;"> ГЕОГЕССЕР</a>
+        <a href="{% url 'profile' %}">Профиль</a>
         <a href="{% url 'achievements' %}">Достижения</a>
         <a href="{% url 'logout' %}" class="btn-logout">Выйти</a>
     </nav>

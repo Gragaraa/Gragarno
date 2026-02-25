@@ -4,15 +4,28 @@ import json
 from django.http import JsonResponse
 from .models import Location, Visit, Route
 import requests
-
-
+import random
+from math import radians, cos, sin, asin, sqrt
+def get_distance(lat1, lon1, lat2, lon2):
+    R = 6371
+    dLat, dLon = radians(lat2 - lat1), radians(lon2 - lon1)
+    a = sin(dLat/2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dLon/2)**2
+    return R * 2 * asin(sqrt(a))
 def index(request):
     return render(request, 'Core/index.html')
 
 
 @login_required
 def map_view(request):
-    user_visits = Visit.objects.filter(user=request.user).select_related('location')
+
+    user_visits = Visit.objects.filter(
+        user=request.user
+    ).exclude(
+        location__name__icontains="Guess"
+    ).exclude(
+        location__is_game_task=True
+    ).select_related('location')
+
     return render(request, 'Core/map.html', {'user_visits': user_visits})
 
 
@@ -130,7 +143,47 @@ def achievements_view(request):
     return render(request, 'Core/achievements.html')
 
 
+@login_required
+def geoguessr_game(request):
 
+    tasks = Location.objects.filter(is_game_task=True)
+    if not tasks:
+        return render(request, 'Core/game.html', {'error': 'Нет доступных панорам'})
+
+    target = random.choice(tasks)
+
+    past_guesses = Visit.objects.filter(user=request.user, location__name__icontains="Guess")
+
+    return render(request, 'Core/game.html', {
+        'target': target,
+        'past_guesses': past_guesses
+    })
+
+
+@login_required
+def submit_guess(request):
+    data = json.loads(request.body)
+    target = get_object_or_404(Location, id=data['target_id'])
+
+    dist = get_distance(target.lat, target.lon, data['lat'], data['lon'])
+
+
+    xp = max(0, int(1000 - (dist * 2)))
+
+
+    new_loc = Location.objects.create(
+        name=f"Guess_{target.name}",
+        lat=data['lat'],
+        lon=data['lon'],
+        is_game_task=False
+    )
+    Visit.objects.create(user=request.user, location=new_loc)
+
+
+    request.user.total_points_ever += 1
+    request.user.add_xp(xp)
+
+    return JsonResponse({'dist': round(dist, 1), 'xp': xp, 't_lat': target.lat, 't_lon': target.lon})
 
 
 

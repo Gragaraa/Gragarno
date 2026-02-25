@@ -27,6 +27,8 @@ urlpatterns = [
     path('delete-visit/<int:visit_id>/', views.delete_visit, name='delete_visit'),
     path('my-routes/', views.routes_list, name='routes_list'),
     path('route/<int:route_id>/', views.view_route, name='view_route'),
-    path('achievements/',views.achievements_view,name='achievements')
+    path('achievements/',views.achievements_view,name='achievements'),
+    path('game', views.geoguessr_game,name='geoguessr'),
+    path('game/submit/', views.submit_guess,name='submit_guess')
 
 ]
