@@ -29,6 +29,11 @@ urlpatterns = [
     path('route/<int:route_id>/', views.view_route, name='view_route'),
     path('achievements/',views.achievements_view,name='achievements'),
     path('game', views.geoguessr_game,name='geoguessr'),
-    path('game/submit/', views.submit_guess,name='submit_guess')
+    path('game/submit/', views.submit_guess,name='submit_guess'),
+    path('forum/', views.forum_index, name='forum_index'),
+    path('forum/category/<int:pk>/', views.category_detail, name='category_detail'),
+    path('users/', views.user_list, name='user_list'),
+    path('forum/category/<int:category_id>/create/', views.create_post, name='create_post'),
+
 
 ]

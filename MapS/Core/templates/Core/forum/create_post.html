@@ -1,0 +1,17 @@
+{% extends 'Core/base.html' %}
+{% block content %}
+<div class="ach-header">
+    <h1>Новая тема в разделе {{ category.name }}</h1>
+</div>
+
+<div class="post-card" style="max-width: 800px; margin: 0 auto;">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div style="margin-top: 20px;">
+            <button type="submit" class="btn-add-post" style="border: none; cursor: pointer;">Опубликовать</button>
+            <a href="{% url 'category_detail' category.id %}" style="margin-left: 15px; color: #666;">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

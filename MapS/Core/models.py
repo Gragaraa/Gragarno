@@ -43,16 +43,31 @@ class UserAchievement(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
     date_unlocked = models.DateTimeField(auto_now_add=True)
+class ForumCategory(models.Model):
+    name = models.CharField(max_length=100, verbose_name="Название раздела")
+    description = models.TextField(blank=True, verbose_name="Описание")
+    icon = models.CharField(max_length=50, default="💬", verbose_name="Эмодзи-иконка")
+    is_readonly = models.BooleanField(default=False, verbose_name='Только для админов')
 
+    def __str__(self):
+        return f"{self.icon} {self.name}"
 
 class ForumPost(models.Model):
+    category = models.ForeignKey(ForumCategory, on_delete=models.CASCADE, related_name='posts', null=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=255, verbose_name="Заголовок")
     content = models.TextField(verbose_name="Текст поста")
+    image = models.ImageField(upload_to='forum_pics/', null=True, blank=True, verbose_name="Картинка")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.title
 class Comment(models.Model):
     post = models.ForeignKey(ForumPost, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+
+

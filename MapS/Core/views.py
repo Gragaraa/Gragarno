@@ -6,6 +6,11 @@ from .models import Location, Visit, Route
 import requests
 import random
 from math import radians, cos, sin, asin, sqrt
+from .models import ForumCategory, ForumPost, Comment
+from django.contrib.auth import get_user_model
+from .forms import PostForm
+from django.contrib import messages
+User = get_user_model()
 def get_distance(lat1, lon1, lat2, lon2):
     R = 6371
     dLat, dLon = radians(lat2 - lat1), radians(lon2 - lon1)
@@ -186,6 +191,45 @@ def submit_guess(request):
     return JsonResponse({'dist': round(dist, 1), 'xp': xp, 't_lat': target.lat, 't_lon': target.lon})
 
 
+
+def forum_index(request):
+    categories = ForumCategory.objects.all()
+    return render(request, 'Core/forum/index.html', {'categories': categories})
+
+
+def category_detail(request, pk):
+    category = get_object_or_404(ForumCategory, pk=pk)
+    posts = category.posts.all().order_by('-created_at')
+    return render(request, 'Core/forum/category.html', {'category': category, 'posts': posts})
+
+
+def user_list(request):
+    users = User.objects.all().order_by('-level') # Топ по уровню
+    return render(request, 'Core/user_list.html', {'users': users})
+
+
+@login_required
+def create_post(request, category_id):
+    category = get_object_or_404(ForumCategory, id=category_id)
+
+    # ПРОВЕРКА: Если раздел "только для чтения" и юзер не админ — кидаем назад
+    if category.is_readonly and not request.user.is_staff:
+        messages.error(request, "В этот раздел могут писать только администраторы!")
+        return redirect('category_detail', pk=category.id)
+
+    if request.method == 'POST':
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.category = category
+            post.save()
+            messages.success(request, "Пост опубликован!")
+            return redirect('category_detail', pk=category.id)
+    else:
+        form = PostForm()
+
+    return render(request, 'Core/forum/create_post.html', {'form': form, 'category': category})
 
 
 

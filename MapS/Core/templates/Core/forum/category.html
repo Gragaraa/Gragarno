@@ -1,0 +1,108 @@
+{% extends 'Core/base.html' %}
+
+{% block title %}{{ category.name }} | Форум{% endblock %}
+
+{% block content %}
+<style>
+    .post-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 1px solid #eee;
+    }
+    .post-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+    .author-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #eee;
+    }
+    .post-image {
+        width: 100%;
+        max-height: 500px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin: 15px 0;
+    }
+    .btn-add-post {
+        background: #3498db;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 30px;
+        transition: 0.3s;
+    }
+    .btn-add-post:hover { background: #2980b9; transform: scale(1.05); }
+    
+    .no-posts {
+        text-align: center;
+        padding: 50px;
+        color: #888;
+        background: #fdfdfd;
+        border-radius: 15px;
+        border: 2px dashed #ddd;
+    }
+</style>
+
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'forum_index' %}" style="text-decoration: none; color: #3498db;">← Назад к разделам</a>
+</div>
+
+<div class="ach-header">
+    <h1>{{ category.icon }} {{ category.name }}</h1>
+    <p>{{ category.description }}</p>
+</div>
+{% if not category.is_readonly or user.is_staff %}
+<a href="{% url 'create_post' category.id %}" class="btn-add-post">➕ Написать в этот раздел</a>
+{% endif %}
+<div class="posts-list">
+    {% for post in posts %}
+        <div class="post-card">
+            <div class="post-header">
+                {% if post.author.avatar %}
+                    <img src="{{ post.author.avatar.url }}" class="author-avatar">
+                {% else %}
+                    <div class="author-avatar" style="display: flex; align-items: center; justify-content: center; background: #3498db; color: white;">
+                        {{ post.author.username|first|upper }}
+                    </div>
+                {% endif %}
+                <div>
+                    <h3 style="margin: 0;">{{ post.title }}</h3>
+                    <small style="color: #888;">
+                        Автор: <a href="{% url 'profile' %}?id={{ post.author.id }}">{{ post.author.username }}</a> | {{ post.created_at|date:"d.m.Y H:i" }}
+                    </small>
+                </div>
+            </div>
+
+            <div class="post-content">
+                <p style="white-space: pre-wrap;">{{ post.content }}</p>
+                
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" class="post-image">
+                {% endif %}
+            </div>
+
+            <div class="post-footer" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
+                <a href="#" style="text-decoration: none; color: #666; font-size: 0.9rem;">💬 Комментарии ({{ post.comments.count }})</a>
+
+            </div>
+        </div>
+    {% empty %}
+        <div class="no-posts">
+            <h3>Здесь пока пусто... 😶‍🌫️</h3>
+            <p>Стань первым, кто создаст тему в этом разделе!</p>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

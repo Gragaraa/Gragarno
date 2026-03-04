@@ -1,0 +1,21 @@
+{% extends 'Core/base.html' %}
+{% block content %}
+<div class="ach-header">
+    <h1>💬 Форум путешественников</h1>
+    <p>Общайся, делись фотками и ищи напарников</p>
+</div>
+
+<div style="display: grid; gap: 20px;">
+    {% for cat in categories %}
+    <a href="{% url 'category_detail' cat.pk %}" style="text-decoration: none; color: inherit;">
+        <div class="ach-card" style="text-align: left; display: flex; align-items: center; gap: 20px;">
+            <span style="font-size: 3rem;">{{ cat.icon }}</span>
+            <div>
+                <h2 style="margin: 0;">{{ cat.name }}</h2>
+                <p style="margin: 5px 0 0; color: #666;">{{ cat.description }}</p>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}
