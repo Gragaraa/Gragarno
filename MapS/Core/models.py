@@ -59,9 +59,16 @@ class ForumPost(models.Model):
     content = models.TextField(verbose_name="Текст поста")
     image = models.ImageField(upload_to='forum_pics/', null=True, blank=True, verbose_name="Картинка")
     created_at = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='post_likes', blank=True)
+    dislikes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='post_dislikes', blank=True)
+
+    def total_score(self):
+        return self.likes.count() - self.dislikes.count()
 
     def __str__(self):
         return self.title
+
+
 class Comment(models.Model):
     post = models.ForeignKey(ForumPost, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

@@ -1,0 +1,105 @@
+{% extends 'Core/base.html' %}
+{% block content %}
+<style>
+    .avatar-round {
+        width: 45px; height: 45px;
+        border-radius: 50%; object-fit: cover; /* Режет под круг */
+        border: 2px solid #2ecc71;
+    }
+    .comment-box {
+        background: #f8f9fa; padding: 15px;
+        border-radius: 10px; margin-bottom: 10px;
+        border-left: 4px solid #2ecc71;
+    }
+    .post-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 1px solid #eee;
+    }
+    .post-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+    .author-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #eee;
+    }
+    .post-image {
+        width: 100%;
+        max-height: 500px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin: 15px 0;
+    }
+    .btn-add-post {
+        background: #3498db;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 30px;
+        transition: 0.3s;
+    }
+    .btn-add-post:hover { background: #2980b9; transform: scale(1.05); }
+
+    .no-posts {
+        text-align: center;
+        padding: 50px;
+        color: #888;
+        background: #fdfdfd;
+        border-radius: 15px;
+        border: 2px dashed #ddd;
+    }
+</style>
+
+<div class="post-card" style="background: white; padding: 20px; border-radius: 15px;">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        {% if post.author.avatar %}
+            <img src="{{ post.author.avatar.url }}" class="avatar-round">
+        {% endif %}
+        <h1 style="margin: 0;">{{ post.title }}</h1>
+    </div>
+    <p style="margin-top: 15px; white-space: pre-wrap;">{{ post.content }}</p>
+    {% if post.image %}<img src="{{ post.image.url }}" style="max-width: 100%; border-radius: 10px;">{% endif %}
+</div>
+<div class="votes" style="display: flex; gap: 10px; align-items: center;">
+    <a href="{% url 'vote_post' post.id 'like' %}" style="text-decoration: none; color: {% if user in post.likes.all %}#2ecc71{% else %}#ccc{% endif %};">
+        👍 {{ post.likes.count }}
+    </a>
+    <a href="{% url 'vote_post' post.id 'dislike' %}" style="text-decoration: none; color: {% if user in post.dislikes.all %}#e74c3c{% else %}#ccc{% endif %};">
+        👎 {{ post.dislikes.count }}
+    </a>
+</div>
+<div style="margin: 15px 0;">
+    Сортировка:
+    <a href="?sort=old">Старые</a> | <a href="?sort=new">Новые</a>
+</div>
+
+<h3 style="margin-top: 30px;">💬 Комментарии</h3>
+{% for comment in comments %}
+    <div class="comment-box">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <strong><a href="{% url 'user_profile' comment.author.id %}">{{ comment.author.username }}</a></strong>
+            <small style="color: #888;">{{ comment.created_at|date:"H:i" }}</small>
+        </div>
+        <p style="margin: 5px 0 0;">{{ comment.text }}</p>
+    </div>
+{% endfor %}
+
+<div style="margin-top: 20px;">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" style="background:#2ecc71; color:white; border:none; padding:10px 20px; border-radius:5px;">Отправить</button>
+    </form>
+</div>
+{% endblock %}

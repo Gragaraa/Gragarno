@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 import json
+from .forms import CommentForm
 from django.http import JsonResponse
 from .models import Location, Visit, Route
 import requests
@@ -10,6 +11,8 @@ from .models import ForumCategory, ForumPost, Comment
 from django.contrib.auth import get_user_model
 from .forms import PostForm
 from django.contrib import messages
+from django.utils import timezone
+from django.db.models import Count
 User = get_user_model()
 def get_distance(lat1, lon1, lat2, lon2):
     R = 6371
@@ -17,7 +20,9 @@ def get_distance(lat1, lon1, lat2, lon2):
     a = sin(dLat/2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dLon/2)**2
     return R * 2 * asin(sqrt(a))
 def index(request):
-    return render(request, 'Core/index.html')
+
+    top_users = User.objects.all().order_by('-total_experience')[:10]
+    return render(request, 'Core/index.html', {'top_users': top_users})
 
 
 @login_required
@@ -199,8 +204,17 @@ def forum_index(request):
 
 def category_detail(request, pk):
     category = get_object_or_404(ForumCategory, pk=pk)
-    posts = category.posts.all().order_by('-created_at')
-    return render(request, 'Core/forum/category.html', {'category': category, 'posts': posts})
+    sort = request.GET.get('sort', 'new')
+
+    posts = category.posts.all()
+
+    if sort == 'popular':
+
+        posts = posts.annotate(like_count=Count('likes')).order_by('-like_count', '-created_at')
+    else:
+        posts = posts.order_by('-created_at')
+
+    return render(request, 'Core/forum/category.html', {'category': category, 'posts': posts, 'current_sort': sort})
 
 
 def user_list(request):
@@ -212,10 +226,18 @@ def user_list(request):
 def create_post(request, category_id):
     category = get_object_or_404(ForumCategory, id=category_id)
 
-    # ПРОВЕРКА: Если раздел "только для чтения" и юзер не админ — кидаем назад
     if category.is_readonly and not request.user.is_staff:
-        messages.error(request, "В этот раздел могут писать только администраторы!")
+        messages.error(request, "Писать сюда могут только админы!")
         return redirect('category_detail', pk=category.id)
+
+    # ПРОВЕРКА КУЛДАУНА
+    last_post = ForumPost.objects.filter(author=request.user).order_by('-created_at').first()
+    if last_post:
+        diff = (timezone.now() - last_post.created_at).total_seconds()
+        if diff < 300:  # 5 минут = 300 секунд
+            wait = int(300 - diff)
+            messages.error(request, f"Подожди еще {wait} сек. перед созданием нового поста!")
+            return redirect('category_detail', pk=category.id)
 
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
@@ -224,16 +246,59 @@ def create_post(request, category_id):
             post.author = request.user
             post.category = category
             post.save()
-            messages.success(request, "Пост опубликован!")
             return redirect('category_detail', pk=category.id)
     else:
         form = PostForm()
-
     return render(request, 'Core/forum/create_post.html', {'form': form, 'category': category})
 
 
+def post_detail(request, post_id):
+    post = get_object_or_404(ForumPost, id=post_id)
+    sort = request.GET.get('sort', 'old')
+
+    if sort == 'new':
+        comments = post.comments.all().order_by('-created_at')
+    else:
+        comments = post.comments.all().order_by('created_at')
+
+    if request.method == 'POST':
+        if not request.user.is_authenticated: return redirect('login')
 
 
+        last_comment = Comment.objects.filter(author=request.user).order_by('-created_at').first()
+        if last_comment:
+            if (timezone.now() - last_comment.created_at).total_seconds() < 30:
+                messages.error(request, "Не части! Комменты раз в 30 секунд.")
+                return redirect('post_detail', post_id=post.id)
+
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.author = request.user
+            comment.save()
+            return redirect('post_detail', post_id=post.id)
+    else:
+        form = CommentForm()
+
+    return render(request, 'Core/forum/post_detail.html',
+                  {'post': post, 'comments': comments, 'form': form, 'current_sort': sort})
+@login_required
+def vote_post(request, post_id, action):
+    post = get_object_or_404(ForumPost, id=post_id)
+    if action == 'like':
+        if request.user in post.likes.all():
+            post.likes.remove(request.user)
+        else:
+            post.likes.add(request.user)
+            post.dislikes.remove(request.user)
+    elif action == 'dislike':
+        if request.user in post.dislikes.all():
+            post.dislikes.remove(request.user)
+        else:
+            post.dislikes.add(request.user)
+            post.likes.remove(request.user)
+    return redirect(request.META.get('HTTP_REFERER', 'forum_index'))
 
 
 

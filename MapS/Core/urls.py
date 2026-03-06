@@ -34,6 +34,8 @@ urlpatterns = [
     path('forum/category/<int:pk>/', views.category_detail, name='category_detail'),
     path('users/', views.user_list, name='user_list'),
     path('forum/category/<int:category_id>/create/', views.create_post, name='create_post'),
+    path('forum/post/<int:post_id>/', views.post_detail, name='post_detail'),
+    path('forum/post/<int:post_id>/vote/<str:action>/', views.vote_post, name='vote_post'),
 
 
 ]

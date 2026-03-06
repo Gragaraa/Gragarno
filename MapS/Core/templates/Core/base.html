@@ -5,7 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Путешествия с картой{% endblock %}</title>
     <style>
+
+.avatar-ranked {
+    object-fit: cover;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+
+.glow-elite {
+    border: 3px solid #f1c40f !important;
+    box-shadow: 0 0 20px rgba(241, 196, 15, 0.8);
+    animation: gold-pulse 2s infinite;
+}
+.nick-elite { color: #f1c40f !important; font-weight: bold; text-transform: uppercase; }
+
+
+.glow-magister {
+    border: 3px solid #3498db !important;
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.7);
+}
+.nick-magister { color: #3498db !important; font-weight: bold; }
+
+
+.glow-wanderer {
+    border: 2px solid #2ecc71 !important;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+}
+.nick-wanderer { color: #2ecc71 !important; }
+
+
+.glow-pioneer { border: 2px solid #e67e22 !important; }
+.nick-pioneer { color: #e67e22 !important; }
+
+@keyframes gold-pulse {
+    0% { box-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
+    50% { box-shadow: 0 0 25px rgba(241, 196, 15, 0.9); }
+    100% { box-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
+}
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f0f2f5; }
+
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
 
 
         header {
@@ -35,7 +79,29 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+{% if messages %}
+<div style="position: fixed; top: 20px; right: 20px; z-index: 1000; width: 300px;">
+    {% for message in messages %}
+    <div class="alert shadow-sm" style="
+        background: {% if message.tags == 'error' %}#ffeded{% else %}#e8f5e9{% endif %};
+        color: {% if message.tags == 'error' %}#d32f2f{% else %}#2e7d32{% endif %};
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        border-left: 5px solid {% if message.tags == 'error' %}#f44336{% else %}#4caf50{% endif %};
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        animation: slideIn 0.5s ease-out;
+    ">
+        <span>{{ message }}</span>
+        <button onclick="this.parentElement.remove()" style="background:none; border:none; cursor:pointer; font-weight:bold; color: inherit;">&times;</button>
+    </div>
+    {% endfor %}
+</div>
 
+
+{% endif %}
 <header>
     <div class="logo">🗺 TravelMap</div>
     <nav>

@@ -65,6 +65,11 @@
 {% if not category.is_readonly or user.is_staff %}
 <a href="{% url 'create_post' category.id %}" class="btn-add-post">➕ Написать в этот раздел</a>
 {% endif %}
+<div style="margin-bottom: 15px;">
+    Сортировать:
+    <a href="?sort=new" style="{% if current_sort == 'new' %}font-weight:bold;{% endif %}">Новые</a> |
+    <a href="?sort=popular" style="{% if current_sort == 'popular' %}font-weight:bold;{% endif %}">Популярные</a>
+</div>
 <div class="posts-list">
     {% for post in posts %}
         <div class="post-card">
@@ -79,7 +84,7 @@
                 <div>
                     <h3 style="margin: 0;">{{ post.title }}</h3>
                     <small style="color: #888;">
-                        Автор: <a href="{% url 'profile' %}?id={{ post.author.id }}">{{ post.author.username }}</a> | {{ post.created_at|date:"d.m.Y H:i" }}
+                        Автор: <a href="{% url 'user_profile'  post.author.id %}">{{ post.author.username }}</a> | {{ post.created_at|date:"d.m.Y H:i" }}
                     </small>
                 </div>
             </div>
@@ -91,9 +96,15 @@
                     <img src="{{ post.image.url }}" class="post-image">
                 {% endif %}
             </div>
+            <div class="votes" style="display: flex; gap: 10px; align-items: center;">
+            <a href="{% url 'vote_post' post.id 'like' %}" style="text-decoration: none; color: {% if user in post.likes.all %}#2ecc71{% else %}#ccc{% endif %};">👍 {{ post.likes.count }}</a>
+    <a href="{% url 'vote_post' post.id 'dislike' %}" style="text-decoration: none; color: {% if user in post.dislikes.all %}#e74c3c{% else %}#ccc{% endif %};">👎 {{ post.dislikes.count }}</a>
+</div>
+
 
             <div class="post-footer" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
-                <a href="#" style="text-decoration: none; color: #666; font-size: 0.9rem;">💬 Комментарии ({{ post.comments.count }})</a>
+
+                <a href="{% url 'post_detail'  post.id %}" style="text-decoration: none; color: #666; font-size: 0.9rem;">💬 Комментарии ({{ post.comments.count }})</a>
 
             </div>
         </div>

@@ -7,7 +7,7 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     level = models.PositiveIntegerField(default=1, verbose_name="Уровень")
     experience = models.PositiveIntegerField(default=0, verbose_name="Опыт")
-    title = models.CharField(max_length=100, default="Исследователь", verbose_name="Звание")
+    title = models.CharField(max_length=100, default="Новичек", verbose_name="Звание")
     total_experience = models.PositiveIntegerField(default=0, verbose_name="Опыт")
 
     ach_1_point = models.BooleanField(default=False)
@@ -33,7 +33,8 @@ class User(AbstractUser):
         while self.experience >= self.xp_to_next_level:
             self.experience -= self.xp_to_next_level
             self.level += 1
-            if self.level == 5: self.title = "Странник"
-            if self.level == 10: self.title = "Первопроходец"
+            if self.level == 5: self.title = "Первопроходец"
+            if self.level == 10: self.title = "Странник"
             if self.level == 20: self.title = "Магистр Карты"
+            if self.level == 30: self.title = 'Элита мира'
         self.save()
