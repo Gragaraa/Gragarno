@@ -16,6 +16,7 @@
 <body>
     <div class="login-container">
         <h2>С возвращением!</h2>
+        <h3>Используйте логин-пароль либо почта-пароль</h3>
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
@@ -23,6 +24,9 @@
         </form>
         <div class="links">
             Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a>
+        </div>
+        <div class="links">
+            Забыли пароль? <a href="{% url 'password_reset_request' %}">Восстановить пароль</a>
         </div>
     </div>
 </body>

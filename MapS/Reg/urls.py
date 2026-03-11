@@ -23,4 +23,7 @@ urlpatterns = [
     path('logout', views.logout_view, name='logout'),
     path('profile', views.profile_view, name='profile'),
     path('profile/<int:user_id>/', views.profile_view, name='user_profile'),
+    path('verify/', views.verify_code_view, name='verify_code'),
+    path('password-reset/', views.password_reset_request_view, name='password_reset_request'),
+    path('password-reset/confirm/',views.password_reset_confirm_view,name='password_reset_confirm_code'),
 ]

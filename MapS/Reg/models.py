@@ -9,6 +9,8 @@ class User(AbstractUser):
     experience = models.PositiveIntegerField(default=0, verbose_name="Опыт")
     title = models.CharField(max_length=100, default="Новичек", verbose_name="Звание")
     total_experience = models.PositiveIntegerField(default=0, verbose_name="Опыт")
+    is_verified = models.BooleanField(default=False,verbose_name='Почта подтверждена')
+    verification_code = models.CharField(max_length=6, blank=True, null=True, verbose_name="Код подтверждения")
 
     ach_1_point = models.BooleanField(default=False)
     ach_10_points = models.BooleanField(default=False)

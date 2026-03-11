@@ -1,6 +1,8 @@
 {% extends 'Core/base.html' %}
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
 <style>
     .map-layout { display: flex; height: calc(100vh - 80px); gap: 10px; }
     #map { flex: 3; border-radius: 10px; }
@@ -39,11 +41,84 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 <script>
     var map = L.map('map').setView([55.75, 37.61], 4);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        // --- ИНИЦИАЛИЗАЦИЯ ПОИСКА ---
+    var geocoder = L.Control.geocoder({
+        defaultMarkGeocode: false, // Отключаем стандартный маркер, будем юзать свой
+        placeholder: "Поиск мест...",
+        errorMessage: "Ничего не найдено"
+    })
+    .on('markgeocode', function(e) {
+        var bbox = e.geocode.bbox;
+        var center = e.geocode.center;
+        var name = e.geocode.name;
+
+        // Плавно перемещаемся к найденному месту
+        map.fitBounds(bbox);
+
+        // Создаем временный маркер с предложением сохранить
+        let tempMarker = L.marker(center).addTo(map)
+            .bindPopup(`<b>${name}</b><br><button onclick="confirmSearchSave(${center.lat}, ${center.lng}, '${name.replace(/'/g, "\\")}')">Сохранить это место</button>`)
+            .openPopup();
+    })
+    .addTo(map);
+
+    // Функция для сохранения из поиска (вызывается из попапа выше)
+    function confirmSearchSave(lat, lon, name) {
+        if (!confirm("Добавить это место в 'Мои места'?")) return;
+
+        fetch("{% url 'save_location' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ lat: lat, lon: lon, name: name })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') location.reload();
+        });
+    }
+    // --- КОНЕЦ ПОИСКА ---
+
 
     let selectedPoints = []; // Массив для временного хранения точек маршрута
+    var routingControl = null; // Контроллер маршрутов
+
+function updateRouting() {
+    // Если точек меньше 2, роутинг не строим
+    if (selectedPoints.length < 2) {
+        if (routingControl) {
+            map.removeControl(routingControl);
+            routingControl = null;
+        }
+        return;
+    }
+
+    // Преобразуем наши точки в формат Leaflet LatLng
+    let waypoints = selectedPoints.map(p => L.latLng(p.lat, p.lon));
+
+    if (routingControl) {
+        routingControl.setWaypoints(waypoints);
+    } else {
+        routingControl = L.Routing.control({
+            waypoints: waypoints,
+            lineOptions: {
+                styles: [{ color: '#3498db', weight: 6, opacity: 0.8 }] // Красивая синяя линия
+            },
+            createMarker: function() { return null; }, // Не плодим лишние маркеры, они у нас уже есть
+            addWaypoints: false, // Запрещаем юзеру тыкать в саму линию (управляем только через список)
+            routeWhileDragging: false,
+            show: false // Скрываем текстовую инструкцию (поверните направо и т.д.)
+        }).addTo(map);
+    }
+}
+
 
     // 1. Создание новой точки по клику на карту
     map.on('click', function(e) {
@@ -90,17 +165,18 @@
     {% endfor %}
 
     // 3. Функция добавления в массив
-    function addToRoute(lat, lon, name) {
-        selectedPoints.push({lat: lat, lon: lon, name: name});
+function addToRoute(lat, lon, name) {
+    // Теперь сохраняем полные данные, а не только имя
+    selectedPoints.push({lat: lat, lon: lon, name: name});
 
-        // Визуально добавляем в список в сайдбаре
-        let list = document.getElementById('selected-points-list');
-        let li = document.createElement('li');
-        li.innerText = name;
-        list.appendChild(li);
+    let list = document.getElementById('selected-points-list');
+    let li = document.createElement('li');
+    li.innerText = name;
+    list.appendChild(li);
 
-        console.log("Добавлено:", name, selectedPoints);
-    }
+    // Обновляем линию на карте
+    updateRouting();
+}
 
     // 4. Отправка на сервер
     function saveRoute() {

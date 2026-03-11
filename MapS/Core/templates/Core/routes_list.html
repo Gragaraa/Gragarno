@@ -39,13 +39,13 @@
         {% endif %}
     </div>
 
-    <div class="timeline">
-        {% for point in route.points_json %}
-            <div class="point-tag">📍 {{ point }}</div>
-        {% empty %}
-            <small style="color: #bbb;">Точки не указаны</small>
-        {% endfor %}
-    </div>
+<div class="timeline">
+    {% for point in route.points_json %}
+        <div class="point-tag">📍 {{ point.name }}</div>
+    {% empty %}
+        <small style="color: #bbb;">Точки не указаны</small>
+    {% endfor %}
+</div>
 
     <div style="margin-top: 20px; display: flex; align-items: center; justify-content: space-between;">
         <small style="color: #95a5a6;">ID маршрута: #{{ route.id }}</small>

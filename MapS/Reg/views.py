@@ -5,15 +5,42 @@ from django.contrib import messages
 from .forms import UserRegisterForm, UserUpdateForm
 from django.contrib.auth.decorators import login_required
 from .models import User
+import random
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+
 
 def register_view(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)
-            messages.success(request, "Регистрация успешна!")
-            return redirect('home')
+            user = form.save(commit=False)
+            user.is_active = False  # Пока не подтвердит код, зайти не сможет
+
+            # Генерируем 6-значный код
+            code = str(random.randint(100000, 999999))
+            user.verification_code = code
+            user.save()
+
+            # Отправка письма
+            subject = 'Код подтверждения MapS'
+            html_message = render_to_string('Reg/verification_email.html', {
+                'user': user,
+                'code': code
+            })
+
+            send_mail(
+                subject,
+                f'Твой код: {code}',  # Текст для простых клиентов
+                'noreply@maps.com',
+                [user.email],
+                html_message=html_message  # Красивая HTML-версия
+            )
+
+            # Сохраняем ID пользователя в сессии, чтобы знать, кого проверять на следующей странице
+            request.session['unverified_user_id'] = user.id
+            messages.info(request, "Код подтверждения отправлен на почту!")
+            return redirect('verify_code')  # Мы создадим этот путь следующим шагом
     else:
         form = UserRegisterForm()
     return render(request, 'Reg/Register.html', {'form': form})
@@ -71,3 +98,86 @@ def profile_view(request, user_id=None):
         'form': form,
         'is_own_profile': is_own_profile
     })
+
+
+def verify_code_view(request):
+
+    user_id = request.session.get('unverified_user_id')
+
+    if not user_id:
+        return redirect('register')
+
+    if request.method == 'POST':
+        code_entered = request.POST.get('code')
+        try:
+            user = User.objects.get(id=user_id)
+            if user.verification_code == code_entered:
+                user.is_active = True
+                user.is_verified = True
+                user.save()
+
+                login(request, user)
+                del request.session['unverified_user_id']
+
+                messages.success(request, "Почта подтверждена! Добро пожаловать.")
+                return redirect('home')
+            else:
+                messages.error(request, "Неверный код. Попробуй еще раз.")
+        except User.DoesNotExist:
+            return redirect('register')
+
+    return render(request, 'Reg/verify_code.html')
+
+
+def password_reset_request_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = User.objects.get(email=email)
+            # Генерируем новый код
+            code = str(random.randint(100000, 999999))
+            user.verification_code = code
+            user.save()
+
+            # Отправляем письмо в Mailtrap
+            subject = 'Сброс пароля MapS'
+            html_message = render_to_string('Reg/reset_password_email.html', {
+                'user': user,
+                'code': code
+            })
+            send_mail(subject, f'Код для сброса: {code}', 'noreply@maps.com', [user.email], html_message=html_message)
+
+            request.session['reset_user_id'] = user.id
+            messages.info(request, "Код для сброса пароля отправлен на почту.")
+            return redirect('password_reset_confirm_code')
+        except User.DoesNotExist:
+            messages.error(request, "Пользователь с такой почтой не найден.")
+
+    return render(request, 'Reg/password_reset_form.html')
+
+
+def password_reset_confirm_view(request):
+    user_id = request.session.get('reset_user_id')
+    if not user_id:
+        return redirect('password_reset_request')
+
+    if request.method == 'POST':
+        code_entered = request.POST.get('code')
+        new_password = request.POST.get('password')
+
+        try:
+            user = User.objects.get(id=user_id)
+            if user.verification_code == code_entered:
+                user.set_password(new_password)  # Хэшируем пароль
+                user.verification_code = None  # Сбрасываем код
+                user.save()
+
+                del request.session['reset_user_id']
+                messages.success(request, "Пароль успешно изменен! Теперь войди.")
+                return redirect('login')
+            else:
+                messages.error(request, "Неверный код.")
+        except User.DoesNotExist:
+            return redirect('password_reset_request')
+
+    return render(request, 'Reg/password_reset_confirm.html')

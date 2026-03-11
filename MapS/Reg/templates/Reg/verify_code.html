@@ -1,0 +1,22 @@
+{% extends 'Core/base.html' %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 50px auto; text-align: center; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <h2>Подтверждение почты 📧</h2>
+    <p>Мы отправили 6-значный код на твой Email. Введи его ниже:</p>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text" name="code" placeholder="000000" maxlength="6" required 
+               style="font-size: 2rem; width: 100%; text-align: center; letter-spacing: 5px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 8px;">
+        
+        <button type="submit" style="width: 100%; background: #2ecc71; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+            Подтвердить
+        </button>
+    </form>
+    
+    <p style="margin-top: 20px; font-size: 0.9rem; color: #666;">
+        Не пришло письмо? Проверь папку "Спам" или Mailtrap.
+    </p>
+</div>
+{% endblock %}
