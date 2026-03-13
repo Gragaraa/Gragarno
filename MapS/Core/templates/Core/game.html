@@ -1,50 +1,19 @@
 {% extends 'Core/base.html' %}
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
-
 <style>
-    .game-container {
-        display: flex;
-        flex-direction: column;
-        height: calc(100vh - 60px);
-        width: 100%;
-        overflow: hidden;
-    }
-
-    #panorama {
-        height: 50%;
-        width: 100%;
-        background: #000;
-    }
-
-    #game-map {
-        height: 50%;
-        width: 100%;
-        z-index: 1;
-    }
-
-    /* Убираем конфликты стилей для тайлов карты */
-    .leaflet-tile-container img {
-        box-shadow: none !important;
-        border-radius: 0 !important;
-    }
-
+    .game-container { display: flex; flex-direction: column; height: calc(100vh - 80px); width: 100%; overflow: hidden; }
+    #panorama { height: 60%; width: 100%; background: #000; }
+    #game-map { height: 40%; width: 100%; z-index: 1; border-top: 4px solid #34495e; }
     .result-overlay {
         display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        background: white; padding: 30px; border-radius: 15px; z-index: 9999; text-align: center;
-        box-shadow: 0 0 30px rgba(0,0,0,0.5); width: 300px;
+        background: white; padding: 30px; border-radius: 20px; z-index: 9999; text-align: center;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3); width: 320px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-{% if error %}
-    <div style="padding: 50px; text-align: center;">
-        <h2>{{ error }}</h2>
-        <p>Запустите команду <code>python manage.py setup_game</code> в консоли.</p>
-    </div>
-{% else %}
 <div class="game-container">
     <div id="panorama"></div>
     <div id="game-map"></div>
@@ -52,50 +21,57 @@
 
 <div id="result" class="result-overlay">
     <h2 id="res-text"></h2>
-    <p id="res-sub"></p>
-    <button onclick="location.reload()" style="padding: 10px 20px; background: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer;">Играть дальше</button>
+    <p id="res-sub" style="font-size: 1.2rem; font-weight: bold; color: #2ecc71;"></p>
+    <button onclick="location.reload()" style="padding: 12px 25px; background: #3498db; color: white; border: none; border-radius: 10px; cursor: pointer;">Следующий раунд</button>
 </div>
+<a href="{% url 'clear_history' %}"
+   style="position: absolute; bottom: 20px; left: 20px; z-index: 1000;
+          background: rgba(231, 76, 60, 0.8); color: white; padding: 8px 15px;
+          border-radius: 8px; text-decoration: none; font-size: 14px; transition: 0.3s;"
+   onmouseover="this.style.background='#e74c3c'"
+   onmouseout="this.style.background='rgba(231, 76, 60, 0.8)'">
+   🗑️ Очистить историю
+</a>
 
-<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+<script src="https://api-maps.yandex.ru/2.1/?apikey={{ api_key }}&lang=ru_RU" type="text/javascript"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-    var panoramaSource = "";
-    {% if target.panorama_file %}
-        panoramaSource = "{{ target.panorama_file.url }}";
-    {% else %}
-        panoramaSource = "{{ target.panorama_url }}";
-    {% endif %}
+    // 1. Инициализация Яндекс Панорамы
+    ymaps.ready(function () {
+        // Проверяем, поддерживает ли браузер панорамы
+        if (!ymaps.panorama.isSupported()) {
+            document.getElementById('panorama').innerHTML = "Панорамы не поддерживаются вашим браузером";
+            return;
+        }
 
-    if (panoramaSource) {
-        pannellum.viewer('panorama', {
-            "type": "equirectangular",
-            "panorama": panoramaSource,
-            "autoLoad": true
-        });
-    }
+        // Ищем ближайшую панораму к нашим координатам
+        // Координаты в Яндекс передаются как [lat, lon]
+        ymaps.panorama.locate([{{ target.lat|stringformat:"f" }}, {{ target.lon|stringformat:"f" }}]).done(
+            function (panoramas) {
+                if (panoramas.length > 0) {
+                    // Создаем плеер с первой найденной панорамой
+                    var player = new ymaps.panorama.Player('panorama', panoramas[0], {
+                        controls: ['zoomControl', 'fullscreenControl'],
+                        suppressMapOpenBlock: true // Убираем лишние кнопки
+                    });
+                } else {
+                    document.getElementById('panorama').innerHTML = "<div style='color:white; padding:20px;'>Панорама для этой точки не найдена.</div>";
+                }
+            },
+            function (error) {
+                console.error(error.message);
+            }
+        );
+    });
 
-
-
-    var map = L.map('game-map', {
-        fadeAnimation: false,
-        zoomAnimation: false
-    }).setView([20, 0], 2);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
-
-
-    setTimeout(function(){
-        map.invalidateSize(true);
-    }, 200);
-
+    // 2. Лифлет карта (оставляем без изменений)
+    var map = L.map('game-map').setView([20, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     {% for visit in past_guesses %}
-        L.circleMarker([{{ visit.location.lat }}, {{ visit.location.lon }}], {
-            radius: 5,
-            color: 'blue',
-            fillOpacity: 0.5
+        L.circleMarker([{{ visit.location.lat|stringformat:"f" }}, {{ visit.location.lon|stringformat:"f" }}], {
+            radius: 4, color: '#3498db', fillOpacity: 0.6
         }).addTo(map);
     {% endfor %}
 
@@ -115,26 +91,17 @@
         })
         .then(res => res.json())
         .then(data => {
+            const targetPos = [data.t_lat, data.t_lon];
+            const guessPos = [e.latlng.lat, e.latlng.lng];
 
-            L.marker([data.t_lat, data.t_lon]).addTo(map).bindPopup("Было здесь!").openPopup();
-            L.polyline([[e.latlng.lat, e.latlng.lng], [data.t_lat, data.t_lon]], {
-                color: 'red',
-                weight: 3,
-                dashArray: '10, 10'
-            }).addTo(map);
-
-
-            var group = new L.featureGroup([
-                L.marker([e.latlng.lat, e.latlng.lng]),
-                L.marker([data.t_lat, data.t_lon])
-            ]);
-            map.fitBounds(group.getBounds().pad(0.2));
+            L.marker(targetPos).addTo(map).bindPopup("Было здесь!").openPopup();
+            L.polyline([guessPos, targetPos], {color: '#e74c3c', weight: 3, dashArray: '5, 10'}).addTo(map);
+            map.fitBounds(L.latLngBounds([guessPos, targetPos]).pad(0.3));
 
             document.getElementById('result').style.display = 'block';
-            document.getElementById('res-text').innerText = `Промах: ${data.dist} км`;
-            document.getElementById('res-sub').innerText = `Заработано: ${data.xp} XP`;
+            document.getElementById('res-text').innerText = `Дистанция: ${data.dist} км`;
+            document.getElementById('res-sub').innerText = `+${data.xp} XP`;
         });
     });
 </script>
-{% endif %}
 {% endblock %}

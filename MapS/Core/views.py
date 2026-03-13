@@ -13,6 +13,9 @@ from .forms import PostForm
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Count
+from django.conf import settings
+from django.shortcuts import redirect
+from .models import Visit
 User = get_user_model()
 def get_distance(lat1, lon1, lat2, lon2):
     R = 6371
@@ -152,10 +155,8 @@ def achievements_view(request):
 
     return render(request, 'Core/achievements.html')
 
-
 @login_required
 def geoguessr_game(request):
-
     tasks = Location.objects.filter(is_game_task=True)
     if not tasks:
         return render(request, 'Core/game.html', {'error': 'Нет доступных панорам'})
@@ -166,34 +167,51 @@ def geoguessr_game(request):
 
     return render(request, 'Core/game.html', {
         'target': target,
-        'past_guesses': past_guesses
+        'past_guesses': past_guesses,
+        'api_key': settings.YANDEX_MAPS_API_KEY
     })
 
 
 @login_required
 def submit_guess(request):
-    data = json.loads(request.body)
-    target = get_object_or_404(Location, id=data['target_id'])
+    try:
+        data = json.loads(request.body)
+        target = get_object_or_404(Location, id=data['target_id'])
 
-    dist = get_distance(target.lat, target.lon, data['lat'], data['lon'])
-
-
-    xp = max(0, int(1000 - (dist * 2)))
+        dist = get_distance(target.lat, target.lon, data['lat'], data['lon'])
 
 
-    new_loc = Location.objects.create(
-        name=f"Guess_{target.name}",
-        lat=data['lat'],
-        lon=data['lon'],
-        is_game_task=False
-    )
-    Visit.objects.create(user=request.user, location=new_loc)
+        xp = max(0, int(1000 - (dist * 2)))
 
 
-    request.user.total_points_ever += 1
-    request.user.add_xp(xp)
+        new_loc = Location.objects.create(
+            name=f"Guess_{target.name}",
+            lat=data['lat'],
+            lon=data['lon'],
+            is_game_task=False
+        )
+        Visit.objects.create(user=request.user, location=new_loc)
 
-    return JsonResponse({'dist': round(dist, 1), 'xp': xp, 't_lat': target.lat, 't_lon': target.lon})
+
+        user = request.user
+        user.total_points_ever += 1
+        user.add_xp(xp)
+
+
+        if user.total_points_ever >= 10 and not user.ach_10_points:
+            user.ach_10_points = True
+            user.add_xp(500)
+
+        user.save()
+
+        return JsonResponse({
+            'dist': round(dist, 1),
+            'xp': xp,
+            't_lat': target.lat,
+            't_lon': target.lon
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 
 
@@ -303,6 +321,13 @@ def vote_post(request, post_id, action):
 
 
 
+@login_required
+def clear_history(request):
+    if request.user.is_authenticated:
+        Visit.objects.filter(user=request.user).delete()
+    guess_locations = Location.objects.filter(name__icontains="Guess")
+    guess_locations.delete()
 
+    return redirect('geoguessr')
 
 

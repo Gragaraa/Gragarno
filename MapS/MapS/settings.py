@@ -135,3 +135,4 @@ AUTHENTICATION_BACKENDS = [
     'Reg.backends.EmailOrUsernameModelBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
+YANDEX_MAPS_API_KEY = 'f3be7202-ba66-439b-9d90-77f74576d5ed'
