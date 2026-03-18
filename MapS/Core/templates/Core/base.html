@@ -59,6 +59,23 @@
             color: #2b3a41;
         }
 
+        .content-wrapper {
+            padding-bottom: 70px; /* под футер */
+        }
+
+        footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:#2c3e50;
+            color:#f0f8ff;
+            text-align:center;
+            padding:12px 0;
+            font-size:0.95rem;
+            z-index: 100;
+        }
+
     @keyframes slideIn {
         from { transform: translateX(100%); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
@@ -140,10 +157,14 @@
     </nav>
 </header>
 
-<div class="container">
+<div class="container content-wrapper">
     {% block content %}
     {% endblock %}
 </div>
+
+<footer>
+    Служба поддержки: <a href="mailto:Gragaranew@gmail.com" style="color:#aad4ff; text-decoration:underline;">Gragaranew@gmail.com</a>
+</footer>
 
 </body>
 </html>

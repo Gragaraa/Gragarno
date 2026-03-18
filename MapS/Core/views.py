@@ -195,12 +195,15 @@ def submit_guess(request):
 
         user = request.user
         user.total_points_ever += 1
+        user.total_experience += xp
         user.add_xp(xp)
 
 
         if user.total_points_ever >= 10 and not user.ach_10_points:
             user.ach_10_points = True
-            user.add_xp(500)
+            bonus_xp = 500
+            user.total_experience += bonus_xp
+            user.add_xp(bonus_xp)
 
         user.save()
 
