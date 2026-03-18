@@ -115,8 +115,9 @@ def verify_code_view(request):
                 user.is_active = True
                 user.is_verified = True
                 user.save()
+                backend='Reg.backends.EmailOrUsernameModelBackend'
 
-                login(request, user)
+                login(request, user, backend )
                 del request.session['unverified_user_id']
 
                 messages.success(request, "Почта подтверждена! Добро пожаловать.")
